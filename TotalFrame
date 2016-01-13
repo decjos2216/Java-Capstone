@@ -1,0 +1,55 @@
+import java.awt.GridLayout;
+
+import javax.swing.*;
+
+
+public class TotalFrame extends JFrame{
+	int gridCounter = 1;
+	int rowTotal = Frame.getTotalRows();
+	
+	//Constructor
+	public TotalFrame(String[] types) {
+		setTitle("Totals");
+		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+		
+		
+		//Determining size of window
+		for (int x = 0; x < types.length; ++x) {
+			if (types[x].equals("1") || types[x].equals("2")) {
+				++gridCounter;
+			}//end if
+		}//end for loop
+		setSize((100 * gridCounter) + 100, 150);
+		setLayout(new GridLayout(2, gridCounter));
+		
+		//Populating grid titles
+		add(new JLabel("Total Items", JLabel.CENTER));
+		for (int x = 0; x < types.length; ++x) {
+			if (types[x].equals("1") || types[x].equals("2")) {
+				add(new JLabel(Frame.getColumnTitle(x), JLabel.CENTER));
+			}//end if
+		}//end for loop
+		
+		//Calculating and populating totals
+		add(new JLabel(Integer.toString(rowTotal), JLabel.CENTER));
+		for (int x = 0; x < types.length; ++x) {
+			if (types[x].equals("1") || types[x].equals("2")) {
+				double total = 0;
+				for (int y = 0; y < rowTotal; ++y) {
+					try {
+						total += Double.parseDouble(Frame.getCellInfo(y, x));
+					} catch (NumberFormatException e) {
+						//Do nothing if the try statement failed
+					}//end try-catch
+				}//end inner for loop
+				if (types[x].equals("1")) {
+					add(new JLabel("$" + total, JLabel.CENTER));
+				} else {
+					add(new JLabel(Double.toString(total), JLabel.CENTER));
+				}
+			}//end if
+		}//end outer for loop
+
+	setVisible(true);
+	}
+}
