@@ -1,0 +1,97 @@
+import java.awt.*;
+import java.awt.event.*;
+import java.lang.reflect.Array;
+import java.util.ArrayList;
+
+import javax.swing.*;
+
+public class InventoryFrame extends JFrame implements ActionListener{
+	//Creating global objects
+	JTextField title = new JTextField(25);
+	JTextField[] text;
+	JComboBox[] type;
+	JLabel textCol = new JLabel("Name of category              ");
+	JLabel typeCol = new JLabel("Type of data       ");
+	JLabel titleText = new JLabel("Name of inventory");
+	JButton okay = new JButton("OK");
+	JButton cancel = new JButton("Cancel");
+	int cols = 1;
+	
+	//Frame setup
+	public InventoryFrame() {
+		//Gathering number of columns to make from user
+		try {
+			cols = Integer.parseInt(JOptionPane.showInputDialog("How many categories does this inventory need?"));
+	    } catch(NumberFormatException e) { 
+	        cols = 1; 
+	    }
+				
+		//Sanitizing input
+		if (cols < 1) 
+			cols = 1;
+		
+		//Setting frame properties
+		setTitle("New Inventory");
+		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+		setLayout(new FlowLayout());
+		setSize(350, 160 + (cols * 30));
+		setResizable(false);
+		
+		//Initializing array
+		text = new JTextField[cols];
+		type = new JComboBox[cols];
+		for (int x = 0; x < cols; ++x) {
+			text[x] = new JTextField(10);
+			type[x] = new JComboBox();
+			type[x].addItem("Name");
+			type[x].addItem("Currency amount");
+			type[x].addItem("Quantity amount");
+		}//end for loop
+		
+		add(titleText);
+		add(title);
+		
+		//Adding components to frame
+		add(textCol);
+		add(typeCol);
+		
+		for(int x = 0; x < cols; ++x) {
+			add(text[x]);
+			add(type[x]);
+		}//end for loop
+		
+		add(okay);
+		add(cancel);
+		
+		//Adding action listeners
+		okay.addActionListener(this);
+		cancel.addActionListener(this);
+		
+		setVisible(true);
+	}
+	
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		// TODO Auto-generated method stub
+		Object source = e.getSource();
+		
+		//Passing information to DataMethods methods
+		try {
+			if(source == okay) {
+				String[] names = new String[cols];
+				int[] dataType = new int[cols];
+				
+				for (int x = 0; x < cols; ++x) {
+					names[x] = text[x].getText();
+					dataType[x] = type[x].getSelectedIndex();
+				}//end for loop
+				DataMethods.createNewInventory(names, dataType, title.getText());
+				JOptionPane.showMessageDialog(null, "New inventory successfully created. Choose \"Select existing inventory\" to access the new inventory.");
+			}//end if
+			dispose();
+		} catch (Exception error) {
+			JOptionPane.showMessageDialog(null, "This inventory record already exists. Please choose a different name.");
+		}//end try-catch
+	}
+
+}
