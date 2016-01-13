@@ -40,6 +40,7 @@ public class DataMethods {
 		//Turning input into output
 		byte[] data = input.getBytes();
 		
+		//Creating and writing to file
 		try {
 			OutputStream output = new BufferedOutputStream(Files.newOutputStream(filePath, CREATE_NEW));
 			output.write(data);
@@ -50,10 +51,13 @@ public class DataMethods {
 		}//end try-catch
 	}
 	
+	//Saves data from current table
 	public static void saveData(Vector info, String path, String[] type, String[] names){
 		Path filePath = Paths.get(path);
 		Object temp;
 		String values;
+		
+		//Building input string
 		String input = "##@##@##@##";
 		input += System.getProperty("line.separator");
 		
@@ -75,7 +79,6 @@ public class DataMethods {
 				temp = info.get(x);
 				values = temp.toString();
 				values = values.substring(1, values.length() - 1);
-				System.out.println(values);
 				input += values;
 				if (x != info.size() - 1) {
 					input += System.getProperty("line.separator");
@@ -85,8 +88,9 @@ public class DataMethods {
 			//Turning input into output
 			byte[] data = input.getBytes();
 			
+		//writing to file	
 		try {
-			OutputStream output = new BufferedOutputStream(Files.newOutputStream(filePath, WRITE));		
+			OutputStream output = new BufferedOutputStream(Files.newOutputStream(filePath, TRUNCATE_EXISTING));		
 			output.write(data);
 			output.flush();
 			output.close();
