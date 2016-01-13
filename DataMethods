@@ -1,0 +1,101 @@
+import java.io.*;
+import java.nio.file.*;
+import java.util.ArrayList;
+import java.util.Vector;
+
+import javax.swing.JOptionPane;
+
+import static java.nio.file.StandardOpenOption.*;
+
+public class DataMethods {
+	
+	//Creates a new inventory text document
+	public static void createNewInventory(String[] names, int[] type, String title) throws Exception{
+		Path filePath = Paths.get(title + ".txt");
+		
+		//Building input string
+		String input = "##@##@##@##";
+		input += System.getProperty("line.separator");
+		
+		for (int x = 0; x < names.length; ++x) {
+			input += names[x];
+			if (x != names.length - 1)
+				input += ", ";
+		}//end for loop
+		input += System.getProperty("line.separator");
+		
+		for (int x = 0; x < type.length; ++x) {
+			input += type[x];
+			if (x != type.length - 1)
+				input += ", ";
+		}//end for loop
+		input += System.getProperty("line.separator");
+		
+		for (int x = 0; x < type.length; ++x) {
+			input += "empty";
+			if (x != type.length - 1)
+				input += ", ";
+		}//end for loop
+		
+		//Turning input into output
+		byte[] data = input.getBytes();
+		
+		//Creating and writing to file
+		try {
+			OutputStream output = new BufferedOutputStream(Files.newOutputStream(filePath, CREATE_NEW));
+			output.write(data);
+			output.flush();
+			output.close();
+		} catch (Exception e) {
+			throw new Exception();
+		}//end try-catch
+	}
+	
+	//Saves data from current table
+	public static void saveData(Vector info, String path, String[] type, String[] names){
+		Path filePath = Paths.get(path);
+		Object temp;
+		String values;
+		
+		//Building input string
+		String input = "##@##@##@##";
+		input += System.getProperty("line.separator");
+		
+		for (int x = 0; x < names.length; ++x) {
+			input += names[x];
+			if (x != names.length - 1)
+				input += ", ";
+		}//end for loop
+		input += System.getProperty("line.separator");
+		
+		for (int x = 0; x < type.length; ++x) {
+			input += type[x];
+			if (x != type.length - 1)
+				input += ", ";
+		}//end for loop
+		input += System.getProperty("line.separator");
+		
+		for (int x = 0; x < info.size(); ++x) {
+				temp = info.get(x);
+				values = temp.toString();
+				values = values.substring(1, values.length() - 1);
+				input += values;
+				if (x != info.size() - 1) {
+					input += System.getProperty("line.separator");
+				}
+			}//end for loop
+			
+			//Turning input into output
+			byte[] data = input.getBytes();
+			
+		//writing to file	
+		try {
+			OutputStream output = new BufferedOutputStream(Files.newOutputStream(filePath, TRUNCATE_EXISTING));		
+			output.write(data);
+			output.flush();
+			output.close();
+		} catch (Exception e) {
+			System.out.println(e);
+		}
+	}
+}
