@@ -19,19 +19,23 @@ public class InventoryFrame extends JFrame implements ActionListener{
 	
 	//Frame setup
 	public InventoryFrame() {
-		//Gather number of columns to make from user
-		cols = Integer.parseInt(JOptionPane.showInputDialog("How many catagories does this inventory need?"));
+		//Gathering number of columns to make from user
+		try {
+			cols = Integer.parseInt(JOptionPane.showInputDialog("How many catagories does this inventory need?"));
+	    } catch(NumberFormatException e) { 
+	        cols = 1; 
+	    }
+				
+		//Sanitizing input
+		if (cols < 1) 
+			cols = 1;
 		
+		//Setting frame properties
 		setTitle("New Inventory");
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		setLayout(new FlowLayout());
 		setSize(300, 160 + (cols * 30));
-		setVisible(true);
 		setResizable(false);
-		
-		//Sanitizing input
-		if (cols < 1) 
-			cols = 1;
 		
 		//Initializing array
 		text = new JTextField[cols];
@@ -63,6 +67,7 @@ public class InventoryFrame extends JFrame implements ActionListener{
 		okay.addActionListener(this);
 		cancel.addActionListener(this);
 		
+		setVisible(true);
 	}
 	
 	@Override
