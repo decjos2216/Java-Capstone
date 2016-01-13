@@ -5,11 +5,14 @@ import java.nio.file.*;
 import java.util.ArrayList;
 import java.util.Vector;
 
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
+import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.*;
 import javax.swing.*;
 
-public class Frame extends JFrame implements ActionListener{
+public class Frame extends JFrame implements ActionListener, TableModelListener{
 	//Creating global components
 	JMenuBar mainBar = new JMenuBar();
 	
@@ -25,6 +28,7 @@ public class Frame extends JFrame implements ActionListener{
 	JMenu actions = new JMenu("Actions");
 	JMenuItem addItem = new JMenuItem("Add item");
 	JMenuItem deleteItem = new JMenuItem("Delete item");
+	JMenuItem viewTotal = new JMenuItem("View totals");
 	
 	JLabel blank1 = new JLabel(" ");
 	JLabel blank2 = new JLabel(" ");
@@ -33,26 +37,33 @@ public class Frame extends JFrame implements ActionListener{
 	
 	File inputFile;
 	
-	//JTabel and various JTable augments
-	JTable table;
-	DefaultTableModel model;
-	
 	JScrollPane center;
+	JPanel total;
 	
 	Container con = getContentPane();
 	
+	static JTable table;
+	DefaultTableModel model;
+	
+	//Arrays for transferring information into another method
 	String[] filePathTransfer = {" "};
 	String[] typesTransfer;
 	String[] namesTransfer;
 	
-	//Primary frame
+	//Variable to check for changes before closing
+	boolean hasSaved = true;
+	
+	//Constructor
 	public Frame(String[] colNames, String[] types, Object[][] info, String filePath) {
+		//Defining JTable and model, transferring information out of the constructor
 		table = new JTable(new DefaultTableModel(info, colNames));
 		model = (DefaultTableModel) table.getModel();
+		table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		filePathTransfer[0] = filePath;
 		typesTransfer = types;
 		namesTransfer = colNames;
 		
+		//Adding table to JPane
 		center = new JScrollPane(table, ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS, ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 		
 		table.setAutoCreateRowSorter(true);
@@ -60,7 +71,7 @@ public class Frame extends JFrame implements ActionListener{
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		con.setLayout(new BorderLayout());
 		setSize(1500, 1000);
-		setVisible(true);
+		
 		
 		//Adding components
 		setJMenuBar(mainBar);
@@ -71,6 +82,7 @@ public class Frame extends JFrame implements ActionListener{
 		mainBar.add(actions);
 		actions.add(addItem);
 		actions.add(deleteItem);
+		actions.add(viewTotal);
 		
 		con.add(blank1, BorderLayout.NORTH);
 		con.add(blank2, BorderLayout.SOUTH);
@@ -80,29 +92,97 @@ public class Frame extends JFrame implements ActionListener{
 		table.setAutoCreateRowSorter(true);
 		
 		//Adding action listeners
+		model.addTableModelListener(this);
 		newInv.addActionListener(this);
 		save.addActionListener(this);
 		close.addActionListener(this);
 		addItem.addActionListener(this);
 		deleteItem.addActionListener(this);
+		viewTotal.addActionListener(this);
+		
+		setVisible(true);
+	}
+	
+	//Getters
+	public static String getColumnTitle(int position) {
+		return table.getColumnName(position);
+	}
+	
+	public static int getTotalRows() {
+		return table.getRowCount();
+	}
+
+	public static String getCellInfo(int row, int col) {
+		return (String)table.getValueAt(row, col);
+	}
+	
+	//Checks to see if the user has saved before closing the current window
+	public void saveCheck() {
+		if (hasSaved == false) {
+			int selection;
+			selection = JOptionPane.showConfirmDialog(null, "Do you want to save before you quit?");
+			if (selection == JOptionPane.YES_OPTION) {
+				Vector data = model.getDataVector();
+				DataMethods.saveData(data, filePathTransfer[0], typesTransfer, namesTransfer);
+				System.exit(0);
+			} else if (selection == JOptionPane.NO_OPTION) {
+				System.exit(0);
+			} else {
+				setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
+			}//end inner if
+			
+		} else {
+			System.exit(0);
+		}//end outer if
 	}
 	
 	@Override
 	public void actionPerformed(ActionEvent e) {
+		if (table.isEditing())
+		    table.getCellEditor().stopCellEditing();
+		
 		//Menu options
 		Object source = e.getSource();
 		if (source == newInv) {
-			dispose();
+			if (hasSaved == false) {
+				int selection;
+				selection = JOptionPane.showConfirmDialog(null, "Do you want to save before you quit?");
+				if (selection == JOptionPane.YES_OPTION) {
+					Vector data = model.getDataVector();
+					DataMethods.saveData(data, filePathTransfer[0], typesTransfer, namesTransfer);
+					dispose();
+				} else if (selection == JOptionPane.NO_OPTION) {
+					dispose();
+				}//end inner if
+			} else {
+				dispose();
+			}//end outer if
 		} else if (source == save) {
 			Vector data = model.getDataVector();
 			DataMethods.saveData(data, filePathTransfer[0], typesTransfer, namesTransfer);
+			hasSaved = true;
 		} else if (source == close) {
-			
+			saveCheck();
 		} else if (source == addItem) {
 			model.addRow(new Object[]{});
+			hasSaved = false;
 		} else if (source == deleteItem) {
-			
-		}
+			int temp = table.getSelectedRow();
+			model.fireTableStructureChanged();
+			if (temp == -1) {
+				JOptionPane.showMessageDialog(null, "Select a row before choosing this option in order to delete it.");
+			} else {
+				model.removeRow(temp);
+				hasSaved = false;
+			}//end inner if
+		} else if (source == viewTotal) {
+			TotalFrame totals = new TotalFrame(typesTransfer);
+		}//end outer if
 		
+	}
+	@Override
+	//Checks to see if the user has made any edits
+	public void tableChanged(TableModelEvent arg0) {
+		hasSaved = false;		
 	}
 }
