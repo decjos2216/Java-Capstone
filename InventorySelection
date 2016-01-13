@@ -1,0 +1,100 @@
+import java.awt.*;
+import java.awt.event.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.file.*;
+
+import javax.swing.*;
+
+public class InventorySelection extends JFrame implements ActionListener{
+	//Creating global components
+	JLabel prompt = new JLabel(          "Please choose an option below          ");
+	
+JButton newInventory = new JButton("Create new inventory");
+	JButton selectInventory = new JButton("Select existing inventory");
+	JButton exit = new JButton("Close program");	
+	
+	public InventorySelection() {
+		//Setting frame properties
+		setTitle("Launcher");
+		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		setLayout(new FlowLayout());
+		setSize(350,150);
+		setVisible(true);
+		setResizable(false);;
+	
+		//Adding components
+		add(prompt);
+		add(newInventory);
+		add(selectInventory);
+		add(exit);
+		
+		//Adding ActionListeners
+		newInventory.addActionListener(this);
+		selectInventory.addActionListener(this);
+		exit.addActionListener(this);	
+	}
+
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		// TODO Auto-generated method stub
+		//Declaring variables and objects
+		String[] names;
+		String[] type;
+		Object[][] data;
+		
+		Object source = e.getSource();
+		if (source == newInventory) {
+			InventoryFrame invFrame = new InventoryFrame();
+		} else if (source == selectInventory) {
+			//Choosing file path
+			JFileChooser fc = new JFileChooser(System.getProperty("user.dir"));
+			int returnVal = fc.showOpenDialog(this);
+			if (returnVal == JFileChooser.APPROVE_OPTION) {
+				File inputFile = fc.getSelectedFile();
+			    String fileString = inputFile.toString();
+				
+				//Opening file for reading
+				Path filePath = Paths.get(fileString);
+				try {
+					String checker;
+					InputStream input = Files.newInputStream(filePath);
+					BufferedReader reader = new BufferedReader(new InputStreamReader(input));
+					
+					//Determining the size of the data array
+					int count = ((int)Files.newBufferedReader(Paths.get(fileString)).lines().count()) - 3;
+					data = new Object[count][];
+					
+					//Checking to see if file is an inventory file
+					checker = reader.readLine();
+					if (!checker.equals("##@##@##@##")) {
+						throw new Exception();
+					}//end if
+					
+					//Fetching data
+					checker = reader.readLine();
+					names = checker.split(", ");
+					
+					checker = reader.readLine();
+					type = checker.split(", ");
+					
+					checker = reader.readLine();
+					for (int x = 0; x < count; ++x) {
+						data[x] = checker.split(", ");
+						checker = reader.readLine();
+					}
+
+					Frame frame = new Frame(names, type, data, fileString);
+					input.close();
+					
+				} catch (Exception error) {
+					JOptionPane.showMessageDialog(null, "This is not an inventory file, please try again...");
+				}
+			}
+		} else if (source == exit){
+			dispose();
+		}
+	}
+}
