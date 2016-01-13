@@ -1,0 +1,108 @@
+import java.awt.*;
+import java.awt.event.*;
+import java.io.*;
+import java.nio.file.*;
+import java.util.ArrayList;
+import java.util.Vector;
+
+import javax.swing.event.TableModelListener;
+import javax.swing.table.*;
+import javax.swing.*;
+
+public class Frame extends JFrame implements ActionListener{
+	//Creating global components
+	JMenuBar mainBar = new JMenuBar();
+	
+	JMenu inventory = new JMenu("Inventory");
+	JMenuItem selectInventory = new JMenuItem("Select inventory");
+	JMenuItem newInventory = new JMenuItem("Create new inventory");
+	
+	JMenu file = new JMenu("File");
+	JMenuItem newInv = new JMenuItem("New/select inventory");
+	JMenuItem save = new JMenuItem("Save");
+	JMenuItem close = new JMenuItem("Close");
+	
+	JMenu actions = new JMenu("Actions");
+	JMenuItem addItem = new JMenuItem("Add item");
+	JMenuItem deleteItem = new JMenuItem("Delete item");
+	
+	JLabel blank1 = new JLabel(" ");
+	JLabel blank2 = new JLabel(" ");
+	JLabel blank3 = new JLabel("     ");
+	JLabel blank4 = new JLabel("     ");
+	
+	File inputFile;
+	
+	//JTabel and various JTable augments
+	JTable table;
+	DefaultTableModel model;
+	
+	JScrollPane center;
+	
+	Container con = getContentPane();
+	
+	String[] filePathTransfer = {" "};
+	String[] typesTransfer;
+	String[] namesTransfer;
+	
+	//Primary frame
+	public Frame(String[] colNames, String[] types, Object[][] info, String filePath) {
+		table = new JTable(new DefaultTableModel(info, colNames));
+		model = (DefaultTableModel) table.getModel();
+		filePathTransfer[0] = filePath;
+		typesTransfer = types;
+		namesTransfer = colNames;
+		
+		center = new JScrollPane(table, ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS, ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+		
+		table.setAutoCreateRowSorter(true);
+		setTitle("Inventory Management System");
+		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		con.setLayout(new BorderLayout());
+		setSize(1500, 1000);
+		setVisible(true);
+		
+		//Adding components
+		setJMenuBar(mainBar);
+		mainBar.add(file);
+		file.add(newInv);
+		file.add(save);
+		file.add(close);
+		mainBar.add(actions);
+		actions.add(addItem);
+		actions.add(deleteItem);
+		
+		con.add(blank1, BorderLayout.NORTH);
+		con.add(blank2, BorderLayout.SOUTH);
+		con.add(blank3, BorderLayout.EAST);
+		con.add(blank4, BorderLayout.WEST);
+		con.add(center, BorderLayout.CENTER);
+		table.setAutoCreateRowSorter(true);
+		
+		//Adding action listeners
+		newInv.addActionListener(this);
+		save.addActionListener(this);
+		close.addActionListener(this);
+		addItem.addActionListener(this);
+		deleteItem.addActionListener(this);
+	}
+	
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		//Menu options
+		Object source = e.getSource();
+		if (source == newInv) {
+			dispose();
+		} else if (source == save) {
+			Vector data = model.getDataVector();
+			DataMethods.saveData(data, filePathTransfer[0], typesTransfer, namesTransfer);
+		} else if (source == close) {
+			
+		} else if (source == addItem) {
+			model.addRow(new Object[]{});
+		} else if (source == deleteItem) {
+			
+		}
+		
+	}
+}
