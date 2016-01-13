@@ -5,14 +5,13 @@ import java.io.File;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.file.*;
-
 import javax.swing.*;
 
 public class InventorySelection extends JFrame implements ActionListener{
 	//Creating global components
 	JLabel prompt = new JLabel(          "Please choose an option below          ");
 	
-JButton newInventory = new JButton("Create new inventory");
+	JButton newInventory = new JButton("Create new inventory");
 	JButton selectInventory = new JButton("Select existing inventory");
 	JButton exit = new JButton("Close program");	
 	
@@ -22,8 +21,7 @@ JButton newInventory = new JButton("Create new inventory");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setLayout(new FlowLayout());
 		setSize(350,150);
-		setVisible(true);
-		setResizable(false);;
+		setResizable(false);
 	
 		//Adding components
 		add(prompt);
@@ -34,7 +32,9 @@ JButton newInventory = new JButton("Create new inventory");
 		//Adding ActionListeners
 		newInventory.addActionListener(this);
 		selectInventory.addActionListener(this);
-		exit.addActionListener(this);	
+		exit.addActionListener(this);
+
+		setVisible(true);	
 	}
 
 	@Override
@@ -45,6 +45,7 @@ JButton newInventory = new JButton("Create new inventory");
 		String[] type;
 		Object[][] data;
 		
+		//Taking action based off of buttons pressed
 		Object source = e.getSource();
 		if (source == newInventory) {
 			InventoryFrame invFrame = new InventoryFrame();
@@ -85,8 +86,22 @@ JButton newInventory = new JButton("Create new inventory");
 						data[x] = checker.split(", ");
 						checker = reader.readLine();
 					}
-
+					reader.close();
+					
+					//Hiding this frame and populating new frame with table data
+					setVisible(false);
 					Frame frame = new Frame(names, type, data, fileString);
+					frame.addWindowListener(new java.awt.event.WindowAdapter() {
+						//Adding Window Listener Adapter to detect when window is closed
+					    @Override
+					    public void windowClosing(java.awt.event.WindowEvent windowEvent) {
+					    	frame.saveCheck();
+					    }
+					    public void windowClosed(java.awt.event.WindowEvent windowEvent) {
+					    	setVisible(true);
+					    }
+					});
+					
 					input.close();
 					
 				} catch (Exception error) {
